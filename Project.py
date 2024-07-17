@@ -173,10 +173,7 @@ def get_random_board(level):
         return None
 
 
-
-
-def print_board(board , time11):
-    time11 = time.time()
+def print_board(board):
     print("    " + "   ".join(str(i + 1) for i in range(9)))
     for i, row in enumerate(board):
         if i % 3 == 0 and i != 0:
@@ -256,16 +253,17 @@ def main():
     choice = display_menu()
     board = get_random_board(choice)
     if board:
+        time1 = time.time()
         while not is_board_complete(board):
             print_board(board)
             get_user_input(board)
         print_board(board)
-        time22 = time()
-        totaltime = time22 - print_board(time11=)
+        time2 = time().time()
+        totaltime = time2 - time1
         minut = totaltime // 60
-        sec = totaltime - (minut*60)
+        sec = totaltime - (minut * 60)
         print("Congratulations! You have completed the board.")
-        print("you did it in  " , minut , "min and" , sec , "second")
+        print("you did it in  ", minut, "min and", sec, "second")
 
 
 if __name__ == "__main__":
