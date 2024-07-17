@@ -173,7 +173,9 @@ def get_random_board(level):
         return None
 
 
-def print_board(board):
+def print_board(
+    board, highlight_positions=None, invalid_positions=None, success_positions=None
+):
     print("    " + "   ".join(str(i + 1) for i in range(9)))
     for i, row in enumerate(board):
         if i % 3 == 0 and i != 0:
@@ -182,34 +184,35 @@ def print_board(board):
         for j, num in enumerate(row):
             if j % 3 == 0 and j != 0:
                 print("|", end="  ")
-            print(f"{num if num != 0 else '.'} ", end=" ")
+            if success_positions and (i, j) in success_positions:
+                print(f"\033[92m{num if num != 0 else '.'}\033[0m ", end=" ")
+            elif highlight_positions and (i, j) in highlight_positions:
+                print(f"\033[93m{num if num != 0 else '.'}\033[0m ", end=" ")
+            elif invalid_positions and (i, j) in invalid_positions:
+                print(f"\033[91m{num}\033[0m ", end=" ")
+            else:
+                print(f"{num if num != 0 else '.'} ", end=" ")
         print()
 
 
 def is_valid_move(board, row, col, num):
+    conflict_positions = []
     for i in range(9):
         if board[row][i] == num:
-            print(
-                f"The number {num} already exists in row {row + 1} and column {i + 1}"
-            )
-            return False
+            conflict_positions.append((row, i))
         if board[i][col] == num:
-            print(
-                f"The number {num} already exists in column {col + 1} and row {i + 1}."
-            )
-            return False
+            conflict_positions.append((i, col))
     start_row, start_col = 3 * (row // 3), 3 * (col // 3)
     for i in range(start_row, start_row + 3):
         for j in range(start_col, start_col + 3):
             if board[i][j] == num:
-                print(
-                    f"The number {num} already exists in the 3x3 block starting at row {start_row + 1} and column {start_col + 1}."
-                )
-                return False
-    return True
+                conflict_positions.append((i, j))
+    if conflict_positions:
+        return False, conflict_positions
+    return True, []
 
 
-def get_user_input(board):
+def get_user_input(board, valid_moves):
     try:
         row = int(input("Enter row (1-9): ")) - 1
         col = int(input("Enter column (1-9): ")) - 1
@@ -219,12 +222,19 @@ def get_user_input(board):
             raise ValueError
 
         if board[row][col] == 0:
-            if is_valid_move(board, row, col, num):
-                board[row][col] = num
-                print("\033[92m" + "Move accepted" + "\033[0m")
-                print("The new Board will be like this:")
+            valid, conflict_positions = is_valid_move(board, row, col, num)
+            board[row][col] = num  # Temporarily place the number for display purposes
+            if valid:
+                valid_moves.append((row, col))
+                print("\033[92mMove accepted\033[0m")
             else:
-                print("\033[91m" + "Invalid move" + "\033[0m")
+                print_board(
+                    board,
+                    highlight_positions=valid_moves,
+                    invalid_positions=[(row, col)] + conflict_positions,
+                )
+                print("\033[91mInvalid move, please try again.\033[0m")
+                board[row][col] = 0  # Reset the number since it was invalid
         else:
             print(
                 "\033[91m"
@@ -252,18 +262,19 @@ def is_board_complete(board):
 def main():
     choice = display_menu()
     board = get_random_board(choice)
+    valid_moves = []
     if board:
         time1 = time.time()
         while not is_board_complete(board):
-            print_board(board)
-            get_user_input(board)
-        print_board(board)
-        time2 = time().time()
+            print_board(board, highlight_positions=valid_moves)
+            get_user_input(board, valid_moves)
+        print_board(board, success_positions=valid_moves)
+        print("Well Done with your choices!")
+        time2 = time.time()
         totaltime = time2 - time1
         minut = totaltime // 60
-        sec = totaltime - (minut * 60)
-        print("Congratulations! You have completed the board.")
-        print("you did it in  ", minut, "min and", sec, "second")
+        sec = totaltime
+        print("You did it in ", minut, "minutes and", sec, "second")
 
 
 if __name__ == "__main__":
