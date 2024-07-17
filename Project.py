@@ -1,6 +1,6 @@
 import random
 import time
-
+# We have some easy boards that will displayed randomly
 easy_boards = [
     [
         [5, 3, 0, 0, 7, 0, 0, 0, 0],
@@ -143,7 +143,13 @@ hard_boards = [
 ]
 
 
-def display_menu():
+def display_menu(): # For displaying the menu and level
+    """
+    Displays the game menu and prompts the user to select a Sudoku difficulty level.
+
+    Returns:
+        str: The user's choice for the difficulty level.
+    """
     print(
         "Welcome to the game, I hope you enjoy playing this game."
         " In this game you should fill the squares in a way that there"
@@ -159,7 +165,16 @@ def display_menu():
 
 
 def get_random_board(level):
-    if level == "1":
+    """
+    Selects a random Sudoku board based on the difficulty level.
+
+    Args:
+        level (str): The difficulty level chosen by the user ('1', '2', '3', or '4').
+
+    Returns:
+        list of list of int: The selected 9x9 Sudoku board.
+    """
+    if level == "1": # Choosing the board randomly
         return random.choice(easy_boards)
     elif level == "2":
         return random.choice(medium_boards)
@@ -172,10 +187,22 @@ def get_random_board(level):
         print("Invalid choice! Please choose a valid difficulty level.")
         return None
 
-
+# Printing the board according to the user input and numbers in the board 
 def print_board(
     board, highlight_positions=None, invalid_positions=None, success_positions=None
 ):
+    """
+    Prints the Sudoku board with optional highlighting for valid, invalid, and success positions.
+
+    Args:
+        board (list of list of int): The 9x9 Sudoku board.
+        highlight_positions (list of tuple, optional): Positions to highlight in yellow.
+        invalid_positions (list of tuple, optional): Positions to highlight in red.
+        success_positions (list of tuple, optional): Positions to highlight in green.
+
+    Returns:
+        None
+    """
     print("    " + "   ".join(str(i + 1) for i in range(9)))
     for i, row in enumerate(board):
         if i % 3 == 0 and i != 0:
@@ -194,9 +221,21 @@ def print_board(
                 print(f"{num if num != 0 else '.'} ", end=" ")
         print()
 
-
+# Cheking to validate the result
 def is_valid_move(board, row, col, num):
-    conflict_positions = []
+    """
+    Checks if placing a number at a given position is a valid move according to Sudoku rules.
+
+    Args:
+        board (list of list of int): The 9x9 Sudoku board.
+        row (int): The row index.
+        col (int): The column index.
+        num (int): The number to place.
+
+    Returns:
+        tuple: A boolean indicating if the move is valid, and a list of conflict positions if invalid.
+    """
+    conflict_positions = [] # Finding the conflict so we can make the numbers red
     for i in range(9):
         if board[row][i] == num:
             conflict_positions.append((row, i))
@@ -211,8 +250,18 @@ def is_valid_move(board, row, col, num):
         return False, conflict_positions
     return True, []
 
-
+# Getting the input from the user to put in the table and for cheking
 def get_user_input(board, valid_moves):
+    """
+    Prompts the user for input and updates the board accordingly.
+
+    Args:
+        board (list of list of int): The 9x9 Sudoku board.
+        valid_moves (list of tuple): List of positions of valid moves made by the user.
+
+    Returns:
+        None
+    """
     try:
         row = int(input("Enter row (1-9): ")) - 1
         col = int(input("Enter column (1-9): ")) - 1
@@ -251,15 +300,30 @@ def get_user_input(board, valid_moves):
             "Invalid input, please enter numbers within the range 1-9 for row and column, and 1-9 for number"
         )
 
-
+# Final result
 def is_board_complete(board):
+    """
+    Checks if the Sudoku board is completely filled.
+
+    Args:
+        board (list of list of int): The 9x9 Sudoku board.
+
+    Returns:
+        bool: True if the board is complete, False otherwise.
+    """
     for row in board:
         if 0 in row:
             return False
     return True
 
-
+# The whole main
 def main():
+    """
+    The main function that runs the Sudoku game.
+
+    Returns:
+        None
+    """
     choice = display_menu()
     board = get_random_board(choice)
     valid_moves = []
@@ -279,3 +343,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# :))
