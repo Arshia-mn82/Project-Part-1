@@ -1,4 +1,5 @@
 import random
+import time
 
 easy_boards = [
     [
@@ -172,7 +173,10 @@ def get_random_board(level):
         return None
 
 
-def print_board(board):
+
+
+def print_board(board , time11):
+    time11 = time.time()
     print("    " + "   ".join(str(i + 1) for i in range(9)))
     for i, row in enumerate(board):
         if i % 3 == 0 and i != 0:
@@ -256,7 +260,12 @@ def main():
             print_board(board)
             get_user_input(board)
         print_board(board)
+        time22 = time()
+        totaltime = time22 - print_board(time11=)
+        minut = totaltime // 60
+        sec = totaltime - (minut*60)
         print("Congratulations! You have completed the board.")
+        print("you did it in  " , minut , "min and" , sec , "second")
 
 
 if __name__ == "__main__":
