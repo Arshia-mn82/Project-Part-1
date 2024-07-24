@@ -374,3 +374,24 @@ def generate_valid_sudoku():
         board[i][j] = 0  # Set some cells to blank
 
     return board
+
+def most_constrained_variable(board):
+    """
+    Selects the cell with the fewest possible values (most constrained).
+    Args:
+        board (list): The Sudoku board.
+    Returns:
+        tuple: The (row, col) of the most constrained cell.
+    """
+    min_options = float("inf")
+    best_cell = None
+    for row in range(9):
+        for col in range(9):
+            if board[row][col] == 0:
+                num_options = sum(
+                    1 for num in range(1, 10) if is_valid_move(board, row, col, num)[0]
+                )
+                if num_options < min_options:
+                    min_options = num_options
+                    best_cell = (row, col)
+    return best_cell
