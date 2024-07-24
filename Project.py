@@ -1,5 +1,6 @@
 import random
 import time
+
 # We have some easy boards that will displayed randomly
 easy_boards = [
     [
@@ -143,12 +144,11 @@ hard_boards = [
 ]
 
 
-def display_menu(): # For displaying the menu and level
+def display_menu():
     """
-    Displays the game menu and prompts the user to select a Sudoku difficulty level.
-
+    Displays the main menu for the game and returns the user's choice.
     Returns:
-        str: The user's choice for the difficulty level.
+        str: The user's menu choice.
     """
     print(
         "Welcome to the game, I hope you enjoy playing this game."
@@ -159,49 +159,51 @@ def display_menu(): # For displaying the menu and level
     print("1. Easy")
     print("2. Medium")
     print("3. Hard")
-    print("4: Exit")
-    choice = input("Enter your choice (1/2/3/4): ")
+    print("4. Solve a New Board")
+    print("5. Exit")
+    choice = input("Enter your choice (1/2/3/4/5): ")
     return choice
 
 
 def get_random_board(level):
     """
-    Selects a random Sudoku board based on the difficulty level.
-
+    Retrieves a Sudoku board based on the chosen difficulty level or generates a new board for solving.
     Args:
-        level (str): The difficulty level chosen by the user ('1', '2', '3', or '4').
-
+        level (str): The chosen difficulty level or '4' for a new board.
     Returns:
-        list of list of int: The selected 9x9 Sudoku board.
+        list: The selected Sudoku board.
     """
-    if level == "1": # Choosing the board randomly
+    if level == "1":
         return random.choice(easy_boards)
     elif level == "2":
         return random.choice(medium_boards)
     elif level == "3":
         return random.choice(hard_boards)
     elif level == "4":
+        return generate_valid_sudoku()  # Generate a new board for solving
+    elif level == "5":
         print("See you soon!")
         exit()
     else:
         print("Invalid choice! Please choose a valid difficulty level.")
         return None
 
-# Printing the board according to the user input and numbers in the board 
+
 def print_board(
-    board, highlight_positions=None, invalid_positions=None, success_positions=None
+    board,
+    highlight_positions=None,
+    invalid_positions=None,
+    success_positions=None,
+    new_positions=None,
 ):
     """
-    Prints the Sudoku board with optional highlighting for valid, invalid, and success positions.
-
+    Prints the Sudoku board with options to highlight positions, indicate invalid entries, and show success.
     Args:
-        board (list of list of int): The 9x9 Sudoku board.
-        highlight_positions (list of tuple, optional): Positions to highlight in yellow.
-        invalid_positions (list of tuple, optional): Positions to highlight in red.
-        success_positions (list of tuple, optional): Positions to highlight in green.
-
-    Returns:
-        None
+        board (list): The Sudoku board.
+        highlight_positions (list): List of positions to highlight.
+        invalid_positions (list): List of positions with invalid entries.
+        success_positions (list): List of positions with successful entries.
+        new_positions (list): List of positions with new entries.
     """
     print("    " + "   ".join(str(i + 1) for i in range(9)))
     for i, row in enumerate(board):
@@ -216,26 +218,26 @@ def print_board(
             elif highlight_positions and (i, j) in highlight_positions:
                 print(f"\033[93m{num if num != 0 else '.'}\033[0m ", end=" ")
             elif invalid_positions and (i, j) in invalid_positions:
-                print(f"\033[91m{num}\033[0m ", end=" ")
+                print(f"\033[91m{num if num != 0 else '.'}\033[0m ", end=" ")
+            elif new_positions and (i, j) in new_positions:
+                print(f"\033[96m{num if num != 0 else '.'}\033[0m ", end=" ")
             else:
                 print(f"{num if num != 0 else '.'} ", end=" ")
         print()
 
-# Cheking to validate the result
+
 def is_valid_move(board, row, col, num):
     """
-    Checks if placing a number at a given position is a valid move according to Sudoku rules.
-
+    Checks if placing a number in a specific cell is valid according to Sudoku rules.
     Args:
-        board (list of list of int): The 9x9 Sudoku board.
-        row (int): The row index.
-        col (int): The column index.
+        board (list): The Sudoku board.
+        row (int): The row index of the cell.
+        col (int): The column index of the cell.
         num (int): The number to place.
-
     Returns:
-        tuple: A boolean indicating if the move is valid, and a list of conflict positions if invalid.
+        tuple: A boolean indicating validity and a list of conflicting positions.
     """
-    conflict_positions = [] # Finding the conflict so we can make the numbers red
+    conflict_positions = []
     for i in range(9):
         if board[row][i] == num:
             conflict_positions.append((row, i))
@@ -250,17 +252,13 @@ def is_valid_move(board, row, col, num):
         return False, conflict_positions
     return True, []
 
-# Getting the input from the user to put in the table and for cheking
+
 def get_user_input(board, valid_moves):
     """
-    Prompts the user for input and updates the board accordingly.
-
+    Prompts the user for input and updates the board with the user's move.
     Args:
-        board (list of list of int): The 9x9 Sudoku board.
-        valid_moves (list of tuple): List of positions of valid moves made by the user.
-
-    Returns:
-        None
+        board (list): The Sudoku board.
+        valid_moves (list): List of valid moves to highlight.
     """
     try:
         row = int(input("Enter row (1-9): ")) - 1
@@ -272,7 +270,7 @@ def get_user_input(board, valid_moves):
 
         if board[row][col] == 0:
             valid, conflict_positions = is_valid_move(board, row, col, num)
-            board[row][col] = num  # Temporarily place the number for display purposes
+            board[row][col] = num
             if valid:
                 valid_moves.append((row, col))
                 print("\033[92mMove accepted\033[0m")
@@ -283,7 +281,7 @@ def get_user_input(board, valid_moves):
                     invalid_positions=[(row, col)] + conflict_positions,
                 )
                 print("\033[91mInvalid move, please try again.\033[0m")
-                board[row][col] = 0  # Reset the number since it was invalid
+                board[row][col] = 0
         else:
             print(
                 "\033[91m"
@@ -300,14 +298,12 @@ def get_user_input(board, valid_moves):
             "Invalid input, please enter numbers within the range 1-9 for row and column, and 1-9 for number"
         )
 
-# Final result
+
 def is_board_complete(board):
     """
     Checks if the Sudoku board is completely filled.
-
     Args:
-        board (list of list of int): The 9x9 Sudoku board.
-
+        board (list): The Sudoku board.
     Returns:
         bool: True if the board is complete, False otherwise.
     """
@@ -316,32 +312,65 @@ def is_board_complete(board):
             return False
     return True
 
-# The whole main
-def main():
-    """
-    The main function that runs the Sudoku game.
 
+def generate_valid_sudoku():
+    """
+    Generates a valid Sudoku board with some cells blanked out.
     Returns:
-        None
+        list: The generated Sudoku board with some cells filled.
     """
-    choice = display_menu()
-    board = get_random_board(choice)
-    valid_moves = []
-    if board:
-        time1 = time.time()
-        while not is_board_complete(board):
-            print_board(board, highlight_positions=valid_moves)
-            get_user_input(board, valid_moves)
-        print_board(board, success_positions=valid_moves)
-        print("Well Done with your choices!")
-        time2 = time.time()
-        totaltime = time2 - time1
-        minut = totaltime // 60
-        sec = totaltime
-        print("You did it in ", minut, "minutes and", sec, "second")
+    board = [[0] * 9 for _ in range(9)]
 
+    def is_valid(board, row, col, num):
+        """
+        Checks if placing a number in a specific cell is valid.
+        Args:
+            board (list): The Sudoku board.
+            row (int): The row index of the cell.
+            col (int): The column index of the cell.
+            num (int): The number to place.
+        Returns:
+            bool: True if valid, False otherwise.
+        """
+        for i in range(9):
+            if board[row][i] == num or board[i][col] == num:
+                return False
+        start_row, start_col = 3 * (row // 3), 3 * (col // 3)
+        for i in range(start_row, start_row + 3):
+            for j in range(start_col, start_col + 3):
+                if board[i][j] == num:
+                    return False
+        return True
 
-if __name__ == "__main__":
-    main()
+    def solve(board):
+        """
+        Solves the Sudoku board using a simple backtracking algorithm.
+        Args:
+            board (list): The Sudoku board.
+        Returns:
+            bool: True if solved, False otherwise.
+        """
+        empty = find_empty_location(board)
+        if not empty:
+            return True
+        row, col = empty
+        nums = list(range(1, 10))
+        random.shuffle(nums)
+        for num in nums:
+            if is_valid(board, row, col, num):
+                board[row][col] = num
+                if solve(board):
+                    return True
+                board[row][col] = 0  # Backtrack
+        return False
 
-# :))
+    solve(board)
+
+    # Add some blanks to make the board partially solved
+    num_blanks = 60  # Number of blanks
+    cells = [(i, j) for i in range(9) for j in range(9)]
+    random.shuffle(cells)
+    for i, j in cells[:num_blanks]:
+        board[i][j] = 0  # Set some cells to blank
+
+    return board
