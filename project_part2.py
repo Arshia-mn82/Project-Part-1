@@ -395,3 +395,54 @@ def most_constrained_variable(board):
                     min_options = num_options
                     best_cell = (row, col)
     return best_cell
+
+
+
+def least_constraining_value(board, row, col):
+    """
+    Orders values by least constraining effect on the board.
+    Args:
+        board (list): The Sudoku board.
+        row (int): The row index of the cell.
+        col (int): The column index of the cell.
+    Returns:
+        list: List of values ordered by least constraining effect.
+    """
+    nums = list(range(1, 10))
+    constraints = []
+    for num in nums:
+        valid, conflicts = is_valid_move(board, row, col, num)
+        if valid:
+            # Count constraints imposed by placing the number
+            constraints_count = 0
+            for i in range(9):
+                if board[row][i] == 0 and not is_valid_move(board, row, i, num)[0]:
+                    constraints_count += 1
+                if board[i][col] == 0 and not is_valid_move(board, i, col, num)[0]:
+                    constraints_count += 1
+            start_row, start_col = 3 * (row // 3), 3 * (col // 3)
+            for i in range(start_row, start_row + 3):
+                for j in range(start_col, start_col + 3):
+                    if board[i][j] == 0 and not is_valid_move(board, i, j, num)[0]:
+                        constraints_count += 1
+            constraints.append((num, constraints_count))
+
+    constraints.sort(key=lambda x: x[1])
+    return [num for num, _ in constraints]
+
+
+def find_empty_location(board):
+    """
+    Finds the first empty location (0) on the Sudoku board.
+    Args:
+        board (list): The Sudoku board.
+    Returns:
+        tuple: The (row, col) of the first empty location.
+    """
+    for i in range(9):
+        for j in range(9):
+            if board[i][j] == 0:
+                return (i, j)
+    return None
+
+
