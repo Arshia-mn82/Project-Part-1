@@ -446,3 +446,78 @@ def find_empty_location(board):
     return None
 
 
+def solve_sudoku_cbs(board):
+    """
+    Solves the Sudoku board using a constraint-based solver with heuristics and backtracking.
+    Args:
+        board (list): The Sudoku board.
+    Returns:
+        bool: True if the board is solved, False otherwise.
+    """
+    computer_moves = []
+
+    def cbs_solve(board):
+        """
+        Recursive function to solve the Sudoku board using CBS with backtracking.
+        Args:
+            board (list): The Sudoku board.
+        Returns:
+            bool: True if solved, False otherwise.
+        """
+        cell = most_constrained_variable(board)
+        if cell is None:
+            return True
+        row, col = cell
+        nums = list(range(1, 10))
+        new_positions = []
+
+        for num in nums:
+            valid = is_valid_move(board, row, col, num)[0]
+            if valid:
+                board[row][col] = num
+                computer_moves.append((row, col))
+                print("This is the new board after placing number", num)
+                print_board(board, new_positions=computer_moves)
+                time.sleep(1)  # Pause to display each step
+
+                if cbs_solve(board):
+                    return True
+                # If placing num did not lead to a solution, backtrack
+                print(
+                    f"Backtracking from cell ({row + 1}, {col + 1}) with number {num}"
+                )
+                board[row][col] = 0  # Remove the number
+                computer_moves.remove((row, col))
+
+        return False
+
+    return cbs_solve(board)
+
+
+def main():
+    """
+    Main function to run the Sudoku game or solve a new board.
+    """
+    while True:
+        choice = display_menu()
+        board = get_random_board(choice)
+        if board:
+            if choice == "4":
+                print("Attempting to solve the new board:")
+                print_board(board, new_positions=[])
+                if solve_sudoku_cbs(board):
+                    print("\033[92mSolved successfully!\033[0m")
+                else:
+                    print("\033[91mNo solution exists\033[0m")
+            else:
+                print("Initial Board:")
+                print_board(board)
+                valid_moves = []
+                while not is_board_complete(board):
+                    get_user_input(board, valid_moves)
+                    print_board(board, highlight_positions=valid_moves)
+                print("Congratulations! You have solved the board.")
+
+
+if __name__ == "__main__":
+    main()
